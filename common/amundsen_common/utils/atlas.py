@@ -33,6 +33,7 @@ class AtlasTableTypes:
     column = 'Column'
     database = 'Database'
 
+
 class AtlasDashboardTypes:
     metadata = 'Dashboard'
     group = 'DashboardGroup'
