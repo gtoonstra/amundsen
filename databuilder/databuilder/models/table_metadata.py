@@ -715,6 +715,30 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
                     )
                     yield column_badge_record
 
+    def _create_atlas_database_entity(self) -> AtlasEntity:
+        """
+        There is a misalignment between terminology used in Atlas and Amundsen.
+
+        Amundsen Schema is Atlas Database.
+        Amundsen Database does not have it's counterpart in Atlas world.
+
+        """
+        attrs_mapping = [
+            (AtlasCommonParams.qualified_name, self._get_schema_key()),
+            ('name', self.schema)
+        ]
+
+        entity_attrs = get_entity_attrs(attrs_mapping)
+
+        entity = AtlasEntity(
+            typeName=AtlasTableTypes.database,
+            operation=AtlasSerializedEntityOperation.CREATE,
+            attributes=entity_attrs,
+            relationships=None
+        )
+
+        return entity
+
     def _create_atlas_table_entity(self) -> AtlasEntity:
         table_type = 'table' if not self.is_view else 'view'
 
@@ -727,11 +751,20 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
 
         entity_attrs = get_entity_attrs(attrs_mapping)
 
+        relationship_list = []  # type: ignore
+
+        add_entity_relationship(
+            relationship_list,
+            'db',
+            AtlasTableTypes.database,
+            self._get_database_key()
+        )
+
         entity = AtlasEntity(
             typeName=AtlasTableTypes.table,
             operation=AtlasSerializedEntityOperation.CREATE,
             attributes=entity_attrs,
-            relationships=None
+            relationships=get_entity_relationships(relationship_list)
         )
 
         return entity
@@ -774,6 +807,7 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
         pass
 
     def _create_next_atlas_entity(self) -> Iterator[AtlasEntity]:
+        yield self._create_atlas_database_entity()
         yield self._create_atlas_table_entity()
 
         for col in self.columns:

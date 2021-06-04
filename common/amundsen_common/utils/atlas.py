@@ -31,6 +31,7 @@ class AtlasCommonTypes:
 class AtlasTableTypes:
     table = 'Table'
     column = 'Column'
+    database = 'Database'
 
 class AtlasDashboardTypes:
     metadata = 'Dashboard'
