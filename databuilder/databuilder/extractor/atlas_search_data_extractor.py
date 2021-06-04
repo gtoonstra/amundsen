@@ -128,7 +128,8 @@ class AtlasSearchDataExtractor(Extractor):
         'Table': [
             ('database', 'attributes.qualifiedName',
              lambda x: AtlasSearchDataExtractorHelpers.get_table_database(x), None),
-            ('cluster', 'attributes.qualifiedName', lambda x: AtlasTableKey(x).get_details()['cluster'], None),
+            ('cluster', 'attributes.qualifiedName',
+             lambda x: AtlasTableKey(x).get_details()['cluster'], None),
             ('schema', 'attributes.qualifiedName',
              lambda x: AtlasTableKey(x).get_details()['schema'], None),
             ('name', 'attributes.name', None, None),
