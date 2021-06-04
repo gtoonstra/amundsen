@@ -777,7 +777,7 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
                                                                   col=column_metadata.name)
         attrs_mapping = [
             (AtlasCommonParams.qualified_name, qualified_name),
-            ('name', self.name),
+            ('name', column_metadata.name or ''),
             ('description', column_metadata.description.text if column_metadata.description else ''),
             ('type', column_metadata.type),
             ('position', column_metadata.sort_order)

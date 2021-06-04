@@ -132,7 +132,7 @@ class AtlasSearchDataExtractor(Extractor):
         'Table': [
             ('database', 'attributes.qualifiedName',
              lambda x: AtlasSearchDataExtractorHelpers.get_table_database(x), None),
-            ('cluster', 'attributes.qualifiedName', lambda x: x.split('@')[-1], None),
+            ('cluster', 'attributes.qualifiedName', lambda x: AtlasTableKey(x).get_details()['cluster'], None),
             ('schema', 'attributes.qualifiedName',
              lambda x: AtlasSearchDataExtractorHelpers.get_table_schema(x), None),
             ('name', 'attributes.name', None, None),
@@ -149,7 +149,9 @@ class AtlasSearchDataExtractor(Extractor):
              lambda x: AtlasSearchDataExtractorHelpers.get_display_text(x), []),
             ('badges', 'classifications',
              lambda x: AtlasSearchDataExtractorHelpers.get_badges_from_classifications(x), []),
-            ('display_name', 'attributes.qualifiedName', lambda x: x.split('@')[0], None),
+            ('display_name', 'attributes.qualifiedName',
+             lambda x: '.'.join([AtlasTableKey(x).get_details()['schema'], AtlasTableKey(x).get_details()['name']]),
+             None),
             ('schema_description', 'attributes.parameters',
              lambda x: AtlasSearchDataExtractorHelpers.get_source_description(x), ''),
             ('programmatic_descriptions', 'attributes.parameters', lambda x: [str(s) for s in list(x.values())], {})
