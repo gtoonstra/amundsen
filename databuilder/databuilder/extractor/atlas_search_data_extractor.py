@@ -96,10 +96,6 @@ class AtlasSearchDataExtractorHelpers:
 
         return parameters.get('sourceDescription', '')
 
-    @staticmethod
-    def get_table_schema(qualified_name: str) -> str:
-        return AtlasTableKey(qualified_name).get_details()['schema']
-
 
 class AtlasSearchDataExtractor(Extractor):
     ATLAS_URL_CONFIG_KEY = 'atlas_url'
@@ -134,7 +130,7 @@ class AtlasSearchDataExtractor(Extractor):
              lambda x: AtlasSearchDataExtractorHelpers.get_table_database(x), None),
             ('cluster', 'attributes.qualifiedName', lambda x: AtlasTableKey(x).get_details()['cluster'], None),
             ('schema', 'attributes.qualifiedName',
-             lambda x: AtlasSearchDataExtractorHelpers.get_table_schema(x), None),
+             lambda x: AtlasTableKey(x).get_details()['schema'], None),
             ('name', 'attributes.name', None, None),
             ('key', 'attributes.qualifiedName', None, None),
             ('description', 'attributes.description', None, None),
