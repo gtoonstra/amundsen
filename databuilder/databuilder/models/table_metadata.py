@@ -757,7 +757,7 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
             relationship_list,
             'db',
             AtlasTableTypes.database,
-            self._get_database_key()
+            self._get_schema_key()
         )
 
         entity = AtlasEntity(
