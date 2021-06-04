@@ -150,7 +150,7 @@ class AtlasSearchDataExtractor(Extractor):
             ('badges', 'classifications',
              lambda x: AtlasSearchDataExtractorHelpers.get_badges_from_classifications(x), []),
             ('display_name', 'attributes.qualifiedName',
-             lambda x: '.'.join([AtlasTableKey(x).get_details()['schema'], AtlasTableKey(x).get_details()['name']]),
+             lambda x: '.'.join([AtlasTableKey(x).get_details()['schema'], AtlasTableKey(x).get_details()['table']]),
              None),
             ('schema_description', 'attributes.parameters',
              lambda x: AtlasSearchDataExtractorHelpers.get_source_description(x), ''),
