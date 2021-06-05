@@ -6,7 +6,7 @@ from typing import (
     Any, Dict, Iterable, Iterator, List, Optional, Set, Union,
 )
 
-from amundsen_common.utils.atlas import AtlasCommonParams, AtlasTableTypes
+from amundsen_common.utils.atlas import AtlasCommonParams, AtlasTableTypes, AtlasCommonTypes
 from amundsen_rds.models import RDSModel
 from amundsen_rds.models.cluster import Cluster as RDSCluster
 from amundsen_rds.models.column import (
@@ -715,14 +715,50 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
                     )
                     yield column_badge_record
 
+    def _create_atlas_cluster_entity(self) -> AtlasEntity:
+        attrs_mapping = [
+            (AtlasCommonParams.qualified_name, self._get_cluster_key()),
+            ('name', self.cluster)
+        ]
+
+        entity_attrs = get_entity_attrs(attrs_mapping)
+
+        entity = AtlasEntity(
+            typeName=AtlasCommonTypes.cluster,
+            operation=AtlasSerializedEntityOperation.CREATE,
+            attributes=entity_attrs,
+            relationships=None
+        )
+
+        return entity
+
     def _create_atlas_database_entity(self) -> AtlasEntity:
-        """
-        There is a misalignment between terminology used in Atlas and Amundsen.
+        attrs_mapping = [
+            (AtlasCommonParams.qualified_name, self._get_database_key()),
+            ('name', self.database)
+        ]
 
-        Amundsen Schema is Atlas Database.
-        Amundsen Database does not have it's counterpart in Atlas world.
+        entity_attrs = get_entity_attrs(attrs_mapping)
 
-        """
+        relationship_list = []  # type: ignore
+
+        add_entity_relationship(
+            relationship_list,
+            'cluster',
+            AtlasCommonTypes.cluster,
+            self._get_cluster_key()
+        )
+
+        entity = AtlasEntity(
+            typeName=AtlasTableTypes.database,
+            operation=AtlasSerializedEntityOperation.CREATE,
+            attributes=entity_attrs,
+            relationships=get_entity_relationships(relationship_list)
+        )
+
+        return entity
+
+    def _create_atlas_schema_entity(self) -> AtlasEntity:
         attrs_mapping = [
             (AtlasCommonParams.qualified_name, self._get_schema_key()),
             ('name', self.schema)
@@ -730,11 +766,20 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
 
         entity_attrs = get_entity_attrs(attrs_mapping)
 
+        relationship_list = []  # type: ignore
+
+        add_entity_relationship(
+            relationship_list,
+            'cluster',
+            AtlasCommonTypes.cluster,
+            self._get_cluster_key()
+        )
+
         entity = AtlasEntity(
-            typeName=AtlasTableTypes.database,
+            typeName=AtlasTableTypes.schema,
             operation=AtlasSerializedEntityOperation.CREATE,
             attributes=entity_attrs,
-            relationships=None
+            relationships=get_entity_relationships(relationship_list)
         )
 
         return entity
@@ -755,8 +800,8 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
 
         add_entity_relationship(
             relationship_list,
-            'db',
-            AtlasTableTypes.database,
+            'amundsen_schema',
+            AtlasTableTypes.schema,
             self._get_schema_key()
         )
 
@@ -807,7 +852,9 @@ class TableMetadata(GraphSerializable, TableSerializable, AtlasSerializable):
         pass
 
     def _create_next_atlas_entity(self) -> Iterator[AtlasEntity]:
+        yield self._create_atlas_cluster_entity()
         yield self._create_atlas_database_entity()
+        yield self._create_atlas_schema_entity()
         yield self._create_atlas_table_entity()
 
         for col in self.columns:
